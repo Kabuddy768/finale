@@ -18,17 +18,37 @@ from statsmodels.tsa.stattools import adfuller
 api_key = "KVXS88KQTDFM2MCL"
 
 # Function to fetch real-time currency data from Alpha Vantage
+# def get_currency_data(from_currency, to_currency):
+#     url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_currency}&to_currency={to_currency}&apikey={api_key}"
+#     response = requests.get(url)
+#     data = response.json()
+#     return float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
 def get_currency_data(from_currency, to_currency):
     url = f"https://www.alphavantage.co/query?function=CURRENCY_EXCHANGE_RATE&from_currency={from_currency}&to_currency={to_currency}&apikey={api_key}"
     response = requests.get(url)
-    data = response.json()
-    return float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+    
+    if response.status_code == 200:
+        data = response.json()
+        if "Realtime Currency Exchange Rate" in data and "5. Exchange Rate" in data["Realtime Currency Exchange Rate"]:
+            return float(data["Realtime Currency Exchange Rate"]["5. Exchange Rate"])
+        else:
+            print("Required keys missing in response:", data)
+            return None
+    else:
+        print("Failed to connect to the API.", response.status_code)
+        return None
 
 # Main app logic
-st.title("Real-Time KES/USD Exchange Rate ")
+# st.title("Real-Time KES/USD Exchange Rate ")
 
+# current_rate = get_currency_data("USD", "KES")
+# st.metric("Current Rate", current_rate, f"USD 1 = {current_rate:.4f} KES")
 current_rate = get_currency_data("USD", "KES")
-st.metric("Current Rate", current_rate, f"USD 1 = {current_rate:.4f} KES")
+if current_rate is not None:
+    st.title("Real-Time KES/USD Exchange Rate ")
+    st.metric("Current Rate", current_rate, f"USD 1 = {current_rate:.4f} KES")
+else:
+    st.write("Couldn't load the latest currency rates at this moment.")
 
 # Simulate interval behavior using query parameters
 #query_params = st.experimental_get_query_params()
