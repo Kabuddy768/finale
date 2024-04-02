@@ -1,0 +1,4 @@
+# streamlit.yml
+language:
+  python:
+    interpreter: python3.11.5
